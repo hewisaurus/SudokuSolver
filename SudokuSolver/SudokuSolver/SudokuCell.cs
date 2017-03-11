@@ -11,7 +11,7 @@ namespace SudokuSolver
         public int Row { get; set; }
         public int Column { get; set; }
         public int Block { get; set; }
-        public int Cell { get; set; }
+        public int CellId { get; set; }
 
         public int? Value { get; set; }
         public List<int> PossibleValues { get; set; }
@@ -24,14 +24,14 @@ namespace SudokuSolver
             PossibleValues = new List<int>();
         }
 
-        public SudokuCell(int row, int column, int block, int cell)
+        public SudokuCell(int row, int column, int block, int cellId)
         {
             Row = row;
             Column = column;
             Block = block;
-            Cell = cell;
-            Locked = true;
-            PossibleValues = new List<int>();
+            CellId = cellId;
+            Locked = false;
+            PossibleValues = new List<int>() { 1, 2, 3, 4, 5, 6, 7, 8, 9 };
         }
     }
 }

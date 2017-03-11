@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SudokuSolver"
         mc:Ignorable="d"
-        Title="MainWindow" Height="492" Width="943.94">
+        Title="MainWindow" Height="534.737" Width="1042.965" Loaded="Window_Loaded">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto"></ColumnDefinition>
@@ -38,6 +38,7 @@
                 <RowDefinition Height="50"></RowDefinition>
                 <RowDefinition Height="50"></RowDefinition>
                 <RowDefinition Height="50"></RowDefinition>
+                <RowDefinition Height="Auto"></RowDefinition>
             </Grid.RowDefinitions>
             <Label Grid.Row="3" Grid.ColumnSpan="11" Grid.Column="0" Background="DarkGray"></Label>
             <Label Grid.Row="7" Grid.ColumnSpan="11" Grid.Column="0" Background="DarkGray"></Label>
@@ -133,6 +134,7 @@
             <TextBox x:Name="C79" Grid.Row="10" Grid.Column="8" HorizontalContentAlignment="Center" FontSize="36" />
             <TextBox x:Name="C80" Grid.Row="10" Grid.Column="9" HorizontalContentAlignment="Center" FontSize="36" />
             <TextBox x:Name="C81" Grid.Row="10" Grid.Column="10" HorizontalContentAlignment="Center" FontSize="36" />
+            <Label Grid.Row="11" Grid.Column="0" Grid.ColumnSpan="11" Name="LblMouseOverText" Margin="5"></Label>
         </Grid>
         <StackPanel Grid.Column="1">
             <Button Name="BtnReset" Content="Reset grid" Margin="5" Padding="5" Click="Click_Reset" />
@@ -143,7 +145,8 @@
             <Button Name="BtnNothing"></Button>
             <Button Name="BtnTestSingleSolveOnce" Content="Test single solve once" Margin="5" Padding="5" Click="BtnTestSingleSolveOnce_Click" />
             <Button Name="BtnTestSingleSolveMultiple" Content="Test single solve multiple" Margin="5" Padding="5" Click="BtnTestSingleSolveMultiple_Click" />
-            <Button Name="BtnShowPossibleValues" Content="Show possible values" Margin="5" Padding="5" Click="BtnShowPossibleValues_Click" />
+            <Button Name="BtnUpdateShowPossibleValues" Content="Update and Show possible values" Margin="5" Padding="5" Click="BtnUpdateShowPossibleValues_Click" />
+            <Button Name="BtnShowPossibleValues" Content="Show possible values in memory" Margin="5" Padding="5" Click="BtnShowPossibleValues_Click" />
             <Button Name="BtnNothing2"></Button>
             <Button Name="BtnSaveState" Content="Save state" Margin="5" Padding="5" Click="BtnSaveState_Click" />
             <Button Name="BtnRestoreState" Content="Restore state" Margin="5" Padding="5" Click="BtnRestoreState_Click" />
@@ -156,9 +159,32 @@
             <Label Name="LblTimeTaken" Content="Time taken: 0"></Label>-->
         </StackPanel>
         <StackPanel Grid.Column="2">
-            <Button Name="BtnRemoveDoubleValuePossibilitiesBlocks" Content="Remove double value possibilities from blocks" Margin="5" Padding="5" />
-            <Button Name="BtnRemoveDoubleValuePossibilitiesRows" Content="Remove double value possibilities from rows" Margin="5" Padding="5" />
-            <Button Name="BtnRemoveDoubleValuePossibilitiesColumns" Content="Remove double value possibilities from columns" Margin="5" Padding="5" />
+            <Button Name="BtnRemoveDoubleValuePossibilitiesBlocks" Content="Remove double value possibilities from blocks" Margin="5" Padding="5" Click="BtnRemoveDoubleValuePossibilitiesBlocks_Click" />
+            <Button Name="BtnRemoveDoubleValuePossibilitiesRows" Content="Remove double value possibilities from rows" Margin="5" Padding="5" Click="BtnRemoveDoubleValuePossibilitiesRows_Click" />
+            <Button Name="BtnRemoveDoubleValuePossibilitiesColumns" Content="Remove double value possibilities from columns" Margin="5" Padding="5" Click="BtnRemoveDoubleValuePossibilitiesColumns_Click" />
+            <Button Name="BtnUpdateSinglePossibilityCells" Content="Update cells with only one possibility" Margin="5" Padding="5" Click="BtnUpdateSinglePossibilityCells_Click" />
+            <Button Name="BtnSolveSingleLocationValues" Content="Solve cells for values that only exist in one place" Margin="5" Padding="5" Click="BtnSolveSingleLocationValues_Click" />
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"></RowDefinition>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                    <ColumnDefinition Width="*"></ColumnDefinition>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                    <ColumnDefinition Width="*"></ColumnDefinition>
+                    <ColumnDefinition Width="Auto"></ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <Label Grid.Row="0" Grid.Column="0" Content="Manually solve cell" VerticalAlignment="Center"></Label>
+                <TextBox Grid.Row="0" Grid.Column="1" Margin="5" Name="TbManualCellId"></TextBox>
+                <Label Grid.Row="0" Grid.Column="2" Content="with value" VerticalAlignment="Center"></Label>
+                <TextBox Grid.Row="0" Grid.Column="3" Margin="5" Name="TbManualCellValue"></TextBox>
+                <Button Grid.Row="0" Grid.Column="4" Margin="5" Padding="10,5" Name="BtnManualCellSolve" Content="Solve" Click="BtnManualCellSolve_Click"></Button>
+            </Grid>
+            <Button Name="BtnRemovePossibilitiesForSingleValueInCollection" Content="Remove possibilities for single value in collections"
+                    Margin="5" Padding="5" ToolTip="For example, if in block 4, the value 2 can only exist in column 2, then remove the possibility of the value 2 from the other two related blocks" Click="BtnRemovePossibilitiesForSingleValueInCollection_Click" />
+            <Button Name="BtnSolveUsingAllLogic" Content="Solve puzzle using all logic available" Margin="5" Padding="5" Click="BtnSolveUsingAllLogic_Click" />
+            <Label Margin="5" Name="LblFinishTimer" Padding="5"></Label>
         </StackPanel>
     </Grid>
 </Window>

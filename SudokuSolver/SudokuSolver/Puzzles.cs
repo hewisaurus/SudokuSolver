@@ -280,7 +280,40 @@ namespace SudokuSolver
                         new Tuple<int, int>(62, 8),
                         new Tuple<int, int>(71, 3),
                         new Tuple<int, int>(72, 4)
-                    }
+                    },
+                    new List<Tuple<int, int>>
+                    {
+                        new Tuple<int, int>(1, 9),
+                        new Tuple<int, int>(2, 7),
+                        new Tuple<int, int>(7, 5),
+                        new Tuple<int, int>(10, 2),
+                        new Tuple<int, int>(15, 9),
+                        new Tuple<int, int>(20, 6),
+                        new Tuple<int, int>(21, 8),
+                        new Tuple<int, int>(22, 7),
+                        new Tuple<int, int>(24, 2),
+                        new Tuple<int, int>(25, 1),
+                        new Tuple<int, int>(26, 3),
+                        new Tuple<int, int>(28, 7),
+                        new Tuple<int, int>(34, 8),
+                        new Tuple<int, int>(38, 8),
+                        new Tuple<int, int>(40, 9),
+                        new Tuple<int, int>(42, 3),
+                        new Tuple<int, int>(44, 5),
+                        new Tuple<int, int>(48, 4),
+                        new Tuple<int, int>(54, 2),
+                        new Tuple<int, int>(56, 5),
+                        new Tuple<int, int>(57, 6),
+                        new Tuple<int, int>(58, 1),
+                        new Tuple<int, int>(60, 4),
+                        new Tuple<int, int>(61, 2),
+                        new Tuple<int, int>(62, 7),
+                        new Tuple<int, int>(67, 8),
+                        new Tuple<int, int>(72, 5),
+                        new Tuple<int, int>(75, 7),
+                        new Tuple<int, int>(80, 4),
+                        new Tuple<int, int>(81, 8)
+                    },
                 };
                 // Puzzle 1
                 // puzzle 2

@@ -41,7 +41,7 @@ namespace SudokuSolver
             SetupCells();
             foreach (var cell in Cells)
             {
-                var tb = Helpers.FindChild<TextBox>(GrMain, $"C{cell.Cell}");
+                var tb = Helpers.FindChild<TextBox>(GrMain, $"C{cell.CellId}");
                 if (tb != null)
                 {
                     tb.Text = null;
@@ -137,33 +137,37 @@ namespace SudokuSolver
 
         private void FillPuzzle(List<Tuple<int, int>> values)
         {
-            foreach (var cell in Cells)
+            foreach (var val in values)
             {
-                cell.Value = null;
-                cell.Locked = false;
+                SetCellValueSolved(val.Item1, val.Item2, true);
             }
+            //foreach (var cell in Cells)
+            //{
+            //    cell.Value = null;
+            //    cell.Locked = false;
+            //}
 
-            foreach (var t in values)
-            {
-                var cell = Cells.FirstOrDefault(c => c.Cell == t.Item1);
-                if (cell != null)
-                {
-                    cell.Value = t.Item2;
-                    cell.Locked = true;
-                }
-            }
+            //foreach (var t in values)
+            //{
+            //    var cell = Cells.FirstOrDefault(c => c.CellId == t.Item1);
+            //    if (cell != null)
+            //    {
+            //        cell.Value = t.Item2;
+            //        cell.Locked = true;
+            //    }
+            //}
 
-            foreach (var cell in Cells)
-            {
-                var tb = Helpers.FindChild<TextBox>(GrMain, $"C{cell.Cell}");
-                if (tb != null)
-                {
-                    tb.Text = cell.Value == null ? "" : cell.Value.ToString();
-                    tb.Background = cell.Locked ? Brushes.LightGray : Brushes.White;
-                    tb.Foreground = Brushes.Black;
-                    tb.IsReadOnly = cell.Locked;
-                }
-            }
+            //foreach (var cell in Cells)
+            //{
+            //    var tb = Helpers.FindChild<TextBox>(GrMain, $"C{cell.CellId}");
+            //    if (tb != null)
+            //    {
+            //        tb.Text = cell.Value == null ? "" : cell.Value.ToString();
+            //        tb.Background = cell.Locked ? Brushes.LightGray : Brushes.White;
+            //        tb.Foreground = Brushes.Black;
+            //        tb.IsReadOnly = cell.Locked;
+            //    }
+            //}
         }
 
         #region test methods
@@ -196,9 +200,9 @@ namespace SudokuSolver
                     }
 
                     sw.Stop();
-                    var thisCell = Cells.First(c => c.Cell == action.CellNumber);
+                    var thisCell = Cells.First(c => c.CellId == action.CellNumber);
                     thisCell.Value = action.Value;
-                    var cellTb = Helpers.FindChild<TextBox>(GrMain, $"C{thisCell.Cell}");
+                    var cellTb = Helpers.FindChild<TextBox>(GrMain, $"C{thisCell.CellId}");
                     if (cellTb != null)
                     {
                         cellTb.Text = thisCell.Value.ToString();
@@ -245,9 +249,9 @@ namespace SudokuSolver
                     sw.Stop();
                     foreach (var action in actions)
                     {
-                        var thisCell = Cells.First(c => c.Cell == action.CellNumber);
+                        var thisCell = Cells.First(c => c.CellId == action.CellNumber);
                         thisCell.Value = action.Value;
-                        var cellTb = Helpers.FindChild<TextBox>(GrMain, $"C{thisCell.Cell}");
+                        var cellTb = Helpers.FindChild<TextBox>(GrMain, $"C{thisCell.CellId}");
                         if (cellTb != null)
                         {
                             cellTb.Text = thisCell.Value.ToString();
@@ -255,7 +259,7 @@ namespace SudokuSolver
                         }
                     }
                     MessageBox.Show($"Single run found {actions.Count} value(s) in {sw.Elapsed}");
-                    
+
                     stopSolve = true;
                 }
                 catch (Exception ex)
@@ -266,7 +270,7 @@ namespace SudokuSolver
                 }
             } while (!stopSolve);
         }
-        
+
         private void BtnSaveState_Click(object sender, RoutedEventArgs e)
         {
 
@@ -282,19 +286,23 @@ namespace SudokuSolver
 
         }
 
-        private void BtnShowPossibleValues_Click(object sender, RoutedEventArgs e)
+        private void BtnUpdateShowPossibleValues_Click(object sender, RoutedEventArgs e)
         {
             UpdatePossibleValues();
 
+            DrawPossibleValues();
+        }
+
+        private void BtnShowPossibleValues_Click(object sender, RoutedEventArgs e)
+        {
+            DrawPossibleValues();
+        }
+
+        private void DrawPossibleValues()
+        {
             foreach (var cell in Cells.Where(c => c.Value == null))
             {
-                var cellTb = Helpers.FindChild<TextBox>(GrMain, $"C{cell.Cell}");
-                if (cellTb != null)
-                {
-                    cellTb.Text = string.Join(", ", cell.PossibleValues);
-                    cellTb.Foreground = Brushes.Red;
-                    cellTb.FontSize = 12;
-                }
+                SetCellValuePossibilities(cell.CellId, cell.PossibleValues);
             }
         }
 
@@ -308,9 +316,9 @@ namespace SudokuSolver
                 }
                 else
                 {
-                    var rowCells = Cells.Where(c => c.Cell != cell.Cell && c.Row == cell.Row).ToList();
-                    var columnCells = Cells.Where(c => c.Cell != cell.Cell && c.Column == cell.Column).ToList();
-                    var blockCells = Cells.Where(c => c.Cell != cell.Cell && c.Block == cell.Block).ToList();
+                    var rowCells = Cells.Where(c => c.CellId != cell.CellId && c.Row == cell.Row).ToList();
+                    var columnCells = Cells.Where(c => c.CellId != cell.CellId && c.Column == cell.Column).ToList();
+                    var blockCells = Cells.Where(c => c.CellId != cell.CellId && c.Block == cell.Block).ToList();
 
                     cell.PossibleValues = new List<int>();
                     for (int i = 1; i <= 9; i++)
@@ -326,6 +334,247 @@ namespace SudokuSolver
                     }
                 }
             }
+        }
+
+        private void BtnRemoveDoubleValuePossibilitiesBlocks_Click(object sender, RoutedEventArgs e)
+        {
+            Cells.RemoveTwoValuePossibilitiesByBlock();
+            DrawPossibleValues();
+        }
+
+        private void BtnRemoveDoubleValuePossibilitiesRows_Click(object sender, RoutedEventArgs e)
+        {
+            Cells.RemoveTwoValuePossibilitiesByRow();
+            DrawPossibleValues();
+        }
+
+        private void BtnRemoveDoubleValuePossibilitiesColumns_Click(object sender, RoutedEventArgs e)
+        {
+            Cells.RemoveTwoValuePossibilitiesByColumn();
+            DrawPossibleValues();
+        }
+
+        private void BtnUpdateSinglePossibilityCells_Click(object sender, RoutedEventArgs e)
+        {
+            var actions = Cells.SolveSingleValuePossibilityCells();
+            if (!actions.Any())
+            {
+                MessageBox.Show("Couldn't find any more solutions");
+                return;
+            }
+
+            foreach (var action in actions)
+            {
+                SetCellValueSolved(action.CellNumber, action.Value);
+            }
+        }
+
+        private void SetCellValueSolved(int cell, int value, bool fromTemplate = false)
+        {
+            // Update cell in memory
+            var memCell = Cells.FirstOrDefault(c => c.CellId == cell);
+            if (memCell != null)
+            {
+                memCell.PossibleValues = new List<int>();
+                memCell.Value = value;
+                if (fromTemplate)
+                {
+                    memCell.Locked = true;
+                }
+                // Remove this value from related cells
+                foreach (var relatedCell in Cells.Where(c => c.Row == memCell.Row && c.CellId != memCell.CellId))
+                {
+                    if (relatedCell.PossibleValues.Contains(value))
+                    {
+                        relatedCell.PossibleValues.Remove(value);
+                    }
+                }
+                foreach (var relatedCell in Cells.Where(c => c.Column == memCell.Column && c.CellId != memCell.CellId))
+                {
+                    if (relatedCell.PossibleValues.Contains(value))
+                    {
+                        relatedCell.PossibleValues.Remove(value);
+                    }
+                }
+                foreach (var relatedCell in Cells.Where(c => c.Block == memCell.Block && c.CellId != memCell.CellId))
+                {
+                    if (relatedCell.PossibleValues.Contains(value))
+                    {
+                        relatedCell.PossibleValues.Remove(value);
+                    }
+                }
+            }
+            // Update cell on screen
+            var cellTb = Helpers.FindChild<TextBox>(GrMain, $"C{cell}");
+            if (cellTb != null)
+            {
+                cellTb.Text = value.ToString();
+                cellTb.Foreground = fromTemplate ? Brushes.Black : Brushes.DarkGreen;
+                cellTb.Background = fromTemplate ? Brushes.LightGray : Brushes.White;
+                cellTb.FontSize = 36;
+                cellTb.IsReadOnly = fromTemplate;
+            }
+
+            // TESTING ONLY - SHOW POSSIBILITIES AUTOMATICALLY
+            //if (true)
+            //{
+            //    DrawPossibleValues();
+            //}
+        }
+
+        private void SetCellValuePossibilities(int cell, List<int> values)
+        {
+            var cellTb = Helpers.FindChild<TextBox>(GrMain, $"C{cell}");
+            if (cellTb != null)
+            {
+                cellTb.Text = string.Join(", ", values);
+                cellTb.Foreground = Brushes.Red;
+                cellTb.FontSize = 12;
+                cellTb.IsReadOnly = false;
+            }
+        }
+
+        private void BtnSolveSingleLocationValues_Click(object sender, RoutedEventArgs e)
+        {
+            var actions = Cells.SolveCellsForSingleValues();
+            if (!actions.Any())
+            {
+                MessageBox.Show("Couldn't find any more solutions");
+                return;
+            }
+
+            foreach (var action in actions)
+            {
+                SetCellValueSolved(action.CellNumber, action.Value);
+            }
+        }
+
+        private void BtnManualCellSolve_Click(object sender, RoutedEventArgs e)
+        {
+            if (!string.IsNullOrEmpty(TbManualCellId.Text) && !string.IsNullOrEmpty(TbManualCellValue.Text))
+            {
+                try
+                {
+                    var cellId = int.Parse(TbManualCellId.Text);
+                    var cellValue = int.Parse(TbManualCellValue.Text);
+                    if (cellId >= 1 && cellId <= 81 && cellValue >= 1 && cellValue <= 9)
+                    {
+                        SetCellValueSolved(cellId, cellValue);
+                    }
+                }
+                catch (Exception exception)
+                {
+                }
+            }
+        }
+
+        private void Cell_MouseEnter(object sender, MouseEventArgs e)
+        {
+            if (sender.GetType() == typeof(TextBox))
+            {
+                var tb = (TextBox)sender;
+                LblMouseOverText.Content = $"Current cell: {tb.Name.Substring(1)}";
+            }
+        }
+
+        private void Cell_MouseLeave(object sender, MouseEventArgs e)
+        {
+            LblMouseOverText.Content = "";
+        }
+
+        private void Window_Loaded(object sender, RoutedEventArgs e)
+        {
+            Reset();
+            for (int i = 1; i <= 81; i++)
+            {
+                var cellTb = Helpers.FindChild<TextBox>(GrMain, $"C{i}");
+                if (cellTb != null)
+                {
+                    cellTb.MouseEnter += Cell_MouseEnter;
+                    cellTb.MouseLeave += Cell_MouseLeave;
+                }
+            }
+        }
+
+        private void BtnRemovePossibilitiesForSingleValueInCollection_Click(object sender, RoutedEventArgs e)
+        {
+            Cells.RemoveInvalidPossibilitiesForRelatedCollections();
+            // TESTING ONLY - SHOW POSSIBILITIES AUTOMATICALLY
+            //if (true)
+            //{
+            //    DrawPossibleValues();
+            //}
+        }
+
+        private async void BtnSolveUsingAllLogic_Click(object sender, RoutedEventArgs e)
+        {
+            // First, loop through the cells and set the values of any that the user may have entered
+            for (int i = 1; i <= 81; i++)
+            {
+                var cellTb = Helpers.FindChild<TextBox>(GrMain, $"C{i}");
+                if (!string.IsNullOrEmpty(cellTb?.Text))
+                {
+                    try
+                    {
+                        // If the cell has a comma in it (like we've clicked show possibilities), ignore it
+                        if (!cellTb.Text.Contains(","))
+                        {
+                            var value = int.Parse(cellTb.Text);
+                            SetCellValueSolved(i, value, true);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show("One or more values are invalid and the puzzle can't be solved! Ensure you have only used the numbers 1-9.");
+                        return;
+                    }
+
+                    //// Check if this was a templated cell
+                    //var memCell = Cells.FirstOrDefault(c => c.CellId == i);
+                    //if (memCell != null)
+                    //{
+                    //    if (!memCell.Locked)
+                    //    {
+                    //        // Not locked means not templated, so the user has entered this one
+                    //        try
+                    //        {
+                    //            memCell.Value = int.Parse(cellTb.Text);
+                    //        }
+                    //        catch (Exception ex)
+                    //        {
+                    //            MessageBox.Show("One or more values are invalid and the puzzle can't be solved! Ensure you have only used the numbers 1-9.");
+                    //            return;
+                    //        }
+                    //    }
+                    //}
+                }
+            }
+
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            bool stopSolve = false;
+            do
+            {
+                if (Cells.Count(c => c.Value == null) == 0)
+                {
+                    //MessageBox.Show("Puzzle solved!");
+                    LblFinishTimer.Content = $"Puzzle solved in {sw.Elapsed}";
+                    sw.Stop();
+                    return;
+                }
+                var actions = Cells.SolveUsingAllLogic();
+                if (!actions.Any())
+                {
+                    MessageBox.Show("Couldn't find any more solutions :(");
+                    sw.Stop();
+                    return;
+                }
+                foreach (var action in actions)
+                {
+                    SetCellValueSolved(action.CellNumber, action.Value);
+                }
+                await Task.Delay(1);
+            } while (!stopSolve);
         }
     }
 }
