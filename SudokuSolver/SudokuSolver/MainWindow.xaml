@@ -5,10 +5,11 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:SudokuSolver"
         mc:Ignorable="d"
-        Title="MainWindow" Height="492" Width="650">
+        Title="MainWindow" Height="492" Width="943.94">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto"></ColumnDefinition>
+            <ColumnDefinition Width="200"></ColumnDefinition>
             <ColumnDefinition Width="*"></ColumnDefinition>
         </Grid.ColumnDefinitions>
         <Grid Name="GrMain" Grid.Row="0" Grid.Column="0">
@@ -139,12 +140,25 @@
             <Button Name="BtnGenerateMedium" Content="Generate medium" Margin="5" Padding="5" Click="BtnGenerateMedium_Click" />
             <Button Name="BtnGenerateHard" Content="Generate hard" Margin="5" Padding="5" Click="BtnGenerateHard_Click" />
             <Button Name="BtnGenerateInsane" Content="Generate insane" Margin="5" Padding="5" Click="BtnGenerateInsane_Click" />
+            <Button Name="BtnNothing"></Button>
+            <Button Name="BtnTestSingleSolveOnce" Content="Test single solve once" Margin="5" Padding="5" Click="BtnTestSingleSolveOnce_Click" />
+            <Button Name="BtnTestSingleSolveMultiple" Content="Test single solve multiple" Margin="5" Padding="5" Click="BtnTestSingleSolveMultiple_Click" />
+            <Button Name="BtnShowPossibleValues" Content="Show possible values" Margin="5" Padding="5" Click="BtnShowPossibleValues_Click" />
+            <Button Name="BtnNothing2"></Button>
+            <Button Name="BtnSaveState" Content="Save state" Margin="5" Padding="5" Click="BtnSaveState_Click" />
+            <Button Name="BtnRestoreState" Content="Restore state" Margin="5" Padding="5" Click="BtnRestoreState_Click" />
+            <Button Name="BtnClearState" Content="Clear state" Margin="5" Padding="5" Click="BtnClearState_Click" />
             <!--<Button Name="BtnSolveWithTimer" Content="Solve w/Backtrack only" Margin="5" Padding="5" Click="Click_SolveTimer" />
             <Button Name="BtnSolveWithLogic" Content="Solve w/Logic only" Margin="5" Padding="5" Click="Click_SolveWithLogic" />
             <Button Name="BtnShowPossibleValues" Content="Show possible cell values" Margin="5" Padding="5" Click="Click_ShowPossibleValues" />
             <Button Name="BtnShowPossibleCalculatedValues" Content="Show possible cell (calc) values" Margin="5" Padding="5" Click="Click_ShowPossibleCalcValues" />
             <Label Name="LblBacktracks" Content="Backtracks: 0"></Label>
             <Label Name="LblTimeTaken" Content="Time taken: 0"></Label>-->
+        </StackPanel>
+        <StackPanel Grid.Column="2">
+            <Button Name="BtnRemoveDoubleValuePossibilitiesBlocks" Content="Remove double value possibilities from blocks" Margin="5" Padding="5" />
+            <Button Name="BtnRemoveDoubleValuePossibilitiesRows" Content="Remove double value possibilities from rows" Margin="5" Padding="5" />
+            <Button Name="BtnRemoveDoubleValuePossibilitiesColumns" Content="Remove double value possibilities from columns" Margin="5" Padding="5" />
         </StackPanel>
     </Grid>
 </Window>

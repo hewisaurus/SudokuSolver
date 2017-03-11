@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -47,6 +48,8 @@ namespace SudokuSolver
                     tb.Background = Brushes.White;
                     tb.Foreground = Brushes.Black;
                     tb.FontSize = 36;
+                    tb.IsReadOnly = false;
+                    tb.TextWrapping = TextWrapping.WrapWithOverflow;
                 }
             }
         }
@@ -158,6 +161,169 @@ namespace SudokuSolver
                     tb.Text = cell.Value == null ? "" : cell.Value.ToString();
                     tb.Background = cell.Locked ? Brushes.LightGray : Brushes.White;
                     tb.Foreground = Brushes.Black;
+                    tb.IsReadOnly = cell.Locked;
+                }
+            }
+        }
+
+        #region test methods
+
+        #endregion
+
+        private async void BtnTestSingleSolveOnce_Click(object sender, RoutedEventArgs e)
+        {
+            var methods = new Methods();
+            bool stopSolve = false;
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            do
+            {
+                try
+                {
+                    if (Cells.All(c => c.Value != null))
+                    {
+                        MessageBox.Show("No cells left to solve");
+                        sw.Stop();
+                        return;
+                    }
+
+                    var action = await methods.DoSingleSolveWithLogic_OnlyPossibleValue_NoTpl(Cells);
+                    if (action == null)
+                    {
+                        MessageBox.Show("Couldn't find any more solutions");
+                        sw.Stop();
+                        return;
+                    }
+
+                    sw.Stop();
+                    var thisCell = Cells.First(c => c.Cell == action.CellNumber);
+                    thisCell.Value = action.Value;
+                    var cellTb = Helpers.FindChild<TextBox>(GrMain, $"C{thisCell.Cell}");
+                    if (cellTb != null)
+                    {
+                        cellTb.Text = thisCell.Value.ToString();
+                        cellTb.Foreground = Brushes.DarkGreen;
+                    }
+
+                    MessageBox.Show($"Single run found one value in {sw.Elapsed}");
+                    stopSolve = true;
+                }
+                catch (Exception ex)
+                {
+                    sw.Stop();
+                    MessageBox.Show($"Something went wrong! {ex.Message}");
+                    stopSolve = true;
+                }
+            } while (!stopSolve);
+        }
+
+        private async void BtnTestSingleSolveMultiple_Click(object sender, RoutedEventArgs e)
+        {
+            var methods = new Methods();
+            bool stopSolve = false;
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
+            do
+            {
+                try
+                {
+                    if (Cells.All(c => c.Value != null))
+                    {
+                        MessageBox.Show("No cells left to solve");
+                        sw.Stop();
+                        return;
+                    }
+
+                    var actions = await methods.DoMultipleSolveWithLogic_OnlyPossibleValue_NoTpl(Cells);
+                    if (!actions.Any())
+                    {
+                        MessageBox.Show("Couldn't find any more solutions");
+                        sw.Stop();
+                        return;
+                    }
+
+                    sw.Stop();
+                    foreach (var action in actions)
+                    {
+                        var thisCell = Cells.First(c => c.Cell == action.CellNumber);
+                        thisCell.Value = action.Value;
+                        var cellTb = Helpers.FindChild<TextBox>(GrMain, $"C{thisCell.Cell}");
+                        if (cellTb != null)
+                        {
+                            cellTb.Text = thisCell.Value.ToString();
+                            cellTb.Foreground = Brushes.DarkGreen;
+                        }
+                    }
+                    MessageBox.Show($"Single run found {actions.Count} value(s) in {sw.Elapsed}");
+                    
+                    stopSolve = true;
+                }
+                catch (Exception ex)
+                {
+                    sw.Stop();
+                    MessageBox.Show($"Something went wrong! {ex.Message}");
+                    stopSolve = true;
+                }
+            } while (!stopSolve);
+        }
+        
+        private void BtnSaveState_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void BtnRestoreState_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void BtnClearState_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        private void BtnShowPossibleValues_Click(object sender, RoutedEventArgs e)
+        {
+            UpdatePossibleValues();
+
+            foreach (var cell in Cells.Where(c => c.Value == null))
+            {
+                var cellTb = Helpers.FindChild<TextBox>(GrMain, $"C{cell.Cell}");
+                if (cellTb != null)
+                {
+                    cellTb.Text = string.Join(", ", cell.PossibleValues);
+                    cellTb.Foreground = Brushes.Red;
+                    cellTb.FontSize = 12;
+                }
+            }
+        }
+
+        private void UpdatePossibleValues()
+        {
+            foreach (var cell in Cells)
+            {
+                if (cell.Value != null)
+                {
+                    cell.PossibleValues = new List<int>();
+                }
+                else
+                {
+                    var rowCells = Cells.Where(c => c.Cell != cell.Cell && c.Row == cell.Row).ToList();
+                    var columnCells = Cells.Where(c => c.Cell != cell.Cell && c.Column == cell.Column).ToList();
+                    var blockCells = Cells.Where(c => c.Cell != cell.Cell && c.Block == cell.Block).ToList();
+
+                    cell.PossibleValues = new List<int>();
+                    for (int i = 1; i <= 9; i++)
+                    {
+                        // Can this cell hold this value?
+                        if (rowCells.All(c => c.Value != i) &&
+                            columnCells.All(c => c.Value != i) &&
+                            blockCells.All(c => c.Value != i))
+                        {
+                            // Yes, it can
+                            cell.PossibleValues.Add(i);
+                        }
+                    }
                 }
             }
         }
