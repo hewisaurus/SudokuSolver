@@ -8,7 +8,10 @@ NB: A collection is a row, column or block of cells. A collection should always 
 The image below depicts how I refer to the cells. Cells are number 1 to 81, left to right and top to bottom.
 Rows, columns and blocks as shown.
 
-<img src="https://raw.githubusercontent.com/hewisaurus/SudokuSolver/master/Images/layout.png">
+<img src="https://raw.githubusercontent.com/hewisaurus/SudokuSolver/master/Images/layout.jpg">
+
+--- 
+## Methods of solving
 
 #### #1: Solve cells for which there is only one possible value
 Using the example below, we can see that Row 1, Column 7 can only possible contain the number 1, as all other numbers from 1-9 exist elsewhere in the same row, column and block
