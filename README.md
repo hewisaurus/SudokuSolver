@@ -1,5 +1,4 @@
 # SudokuSolver
-Playing around with different methods to solve sudoku puzzles
 
 Currently this uses a number of different methods to solve puzzles..
 
