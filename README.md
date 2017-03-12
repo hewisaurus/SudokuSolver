@@ -40,3 +40,5 @@ Using the example below, we can see that within block 4, only column 2 can conta
 As there must be a number 2 in column 2, we can safely remove 2 from the possible values for cells within column 2 in blocks 1 and 7.
 
 <img src="https://raw.githubusercontent.com/hewisaurus/SudokuSolver/master/Images/step4.PNG">
+
+All of the images here have been produced by myself and I have not used code from anyone else, it was all completely written from scratch.

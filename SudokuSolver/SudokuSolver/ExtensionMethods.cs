@@ -15,6 +15,64 @@ namespace SudokuSolver
                 // Determine if any two cells in this group contain only the same two possibilities
                 var twoPossibilityCells = blockGroup.Where(c => c.PossibleValues.Count == 2).ToList();
                 RemoveTwoValuePossibilities(blockGroup.ToList(), twoPossibilityCells);
+
+                // On top of this, check if only two cells contain two values even if the list of possibilities is longer
+                // i.e. if the possible values 7 & 8 only exist in two cells, then those cells must contain 7 or 8 and the related
+                // cells cannot contain 7 nor 8
+
+                var valueDict = new Dictionary<int, List<int>>();
+                for (int i = 1; i <= 9; i++)
+                {
+                    // How many cells can this number exist in, if it hasn't been solved already?
+                    if (blockGroup.All(c => c.Value != i))
+                    {
+                        // Value hasn't been solved, so check the number of cells it could exist in
+                        var possibleValueCells = blockGroup.Where(c => c.Value == null && c.PossibleValues.Contains(i)).Select(c => c.CellId).ToList();
+                        if (possibleValueCells.Count == 2)
+                        {
+                            // Record this value and check for others that only have two possible locations
+                            valueDict.Add(i, new List<int>(possibleValueCells));
+                        }
+                    }
+                }
+                // Now that we have looped through 1-9, check whether any numbers from 1-9 can only exist in two places
+                if (blockGroup.Key == 5)
+                {
+                    var valuePairs = new List<Tuple<int, int, List<int>>>();
+                    if (valueDict.Keys.Count > 1)
+                    {
+                        foreach (var kvp in valueDict)
+                        {
+                            var matchingKvp = valueDict.FirstOrDefault(kv => kv.Value.SequenceEqual(kvp.Value) && kv.Key != kvp.Key);
+                            if (matchingKvp.Key > 0)
+                            {
+                                // These two cells matched possible values, so set these two values as the only two options for these cells
+                                foreach (var cellId in kvp.Value)
+                                {
+                                    blockGroup.First(c => c.CellId == cellId).PossibleValues = new List<int> { kvp.Key, matchingKvp.Key };
+                                }
+                                //blockGroup.First(c => c.CellId == kvp.Key).PossibleValues = kvp.Value;
+                                //blockGroup.First(c => c.CellId == matchingKvp.Key).PossibleValues = kvp.Value;
+
+                                //blockGroup.First(c => c.CellId == kvp.Key).PossibleValues.Remove()
+
+
+                                //foreach (var cell in blockGroup.FirstOrDefault(c => c.CellId == kvp.Key))
+                                //valuePairs.Add(new Tuple<int, int, List<int>>(kvp.Key, matchingKvp.Key, new List<int>(kvp.Value)));
+                                break;
+                            }
+                        }
+                    }
+
+                    // Check if we found any matching pairs
+                    //if (valuePairs.Any())
+                    //{
+                    //    // Item1 is the first value, Item2 is the second value and Item3 is the list of cells that they were found in.
+                    //    // Loop through the 'found' cells and remove all possibilities other than the two that are in Item1 and Item2
+                    //    var matchedPair = valuePairs.First();
+
+                    //}
+                }
             }
         }
 
@@ -171,8 +229,10 @@ namespace SudokuSolver
             for (int i = 1; i <= 9; i++)
             {
                 var i1 = i;
+
+                // For blocks, check rows and columns
                 var blockCells = cells.Where(c => c.Block == i1).ToList();
-                // Loop through 1-9 and check which rows they can be found on
+                // Loop through 1-9 and check which rows  / columns they can be found on
                 for (int n = 1; n <= 9; n++)
                 {
                     var n1 = n;
@@ -199,6 +259,46 @@ namespace SudokuSolver
                         {
                             relatedCell.PossibleValues.Remove(n);
                         }
+
+                        continue;
+                    }
+                }
+
+                // For columns, check blocks
+                var columnCells = cells.Where(c => c.Column == i1).ToList();
+                // Loop through 1-9 and check which blocks they are found in
+                for (int n = 1; n <= 9; n++)
+                {
+                    var n1 = n;
+                    var validBlocks = columnCells.Where(c => c.Value == null && c.PossibleValues.Contains(n1)).Select(c => c.Block).Distinct().ToList();
+                    if (validBlocks.Count == 1)
+                    {
+                        // The number n was only found in one block, therefore other columns in this block should not
+                        // have n as a possible value
+                        foreach (var relatedCell in cells.Where(c => c.Column != i && c.Block == validBlocks[0]))
+                        {
+                            relatedCell.PossibleValues.Remove(n);
+                        }
+
+                        continue;
+                    }
+                }
+
+                // For rows, check blocks
+                var rowCells = cells.Where(c => c.Row == i1).ToList();
+                // Loop through 1-9 and check which blocks they are found in
+                for (int n = 1; n <= 9; n++)
+                {
+                    var n1 = n;
+                    var validBlocks = rowCells.Where(c => c.Value == null && c.PossibleValues.Contains(n1)).Select(c => c.Block).Distinct().ToList();
+                    if (validBlocks.Count == 1)
+                    {
+                        // The number n was only found in one block, therefore other rows in this block should not
+                        // have n as a possible value
+                        foreach (var relatedCell in cells.Where(c => c.Row != i && c.Block == validBlocks[0]))
+                        {
+                            relatedCell.PossibleValues.Remove(n);
+                        }
                     }
                 }
             }
@@ -207,6 +307,16 @@ namespace SudokuSolver
         public static List<SolveAction> SolveUsingAllLogic(this List<SudokuCell> cells)
         {
             var returnValue = new List<SolveAction>();
+
+            // #3: Remove double-value possibilities from collections
+            // e.g. If row 1, column 2 & 3 can only have the values 7 & 8 in them both, then remove the values 7 & 8 from all other cells in that row
+            cells.RemoveTwoValuePossibilitiesByBlock();
+            cells.RemoveTwoValuePossibilitiesByRow();
+            cells.RemoveTwoValuePossibilitiesByColumn();
+
+            // #4: Remove possibilities for single values in a collection
+            // e.g. If in block 4, the value 7 can only exist in column 2, then remove the possibility of the value 7 from column 2 within the other two related blocks
+            cells.RemoveInvalidPossibilitiesForRelatedCollections();
 
             // NB: A collection is a row, column or block of cells. A collection should always contain 9 cells.
             // Order of action:
@@ -226,15 +336,7 @@ namespace SudokuSolver
             {
                 return returnValue;
             }
-            // #3: Remove double-value possibilities from collections
-            // e.g. If row 1, column 2 & 3 can only have the values 7 & 8 in them both, then remove the values 7 & 8 from all other cells in that row
-            cells.RemoveTwoValuePossibilitiesByBlock();
-            cells.RemoveTwoValuePossibilitiesByRow();
-            cells.RemoveTwoValuePossibilitiesByColumn();
-
-            // #4: Remove possibilities for single values in a collection
-            // e.g. If in block 4, the value 7 can only exist in column 2, then remove the possibility of the value 7 from column 2 within the other two related blocks
-            cells.RemoveInvalidPossibilitiesForRelatedCollections();
+            
 
             // Run #1 and #2 again as #3 and #4 may have removed invalid possibilities.
             returnValue = cells.SolveSingleValuePossibilityCells();
